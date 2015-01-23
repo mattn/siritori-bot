@@ -335,6 +335,6 @@ func main() {
 				time.Sleep(5 * time.Second)
 			}
 		}
-		since = tweets[len(tweets)-1].Identifier
+		since = tweets[0].Identifier
 	}
 }
