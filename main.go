@@ -306,35 +306,33 @@ func main() {
 		dict = filepath.Join(filepath.Dir(os.Args[0]), "dict.txt")
 	}
 
-	tweets, err := getTweets(token, "https://api.twitter.com/1.1/statuses/mentions_timeline.json", option{"count": "1"})
-	if err != nil {
-		log.Fatal("failed to get first mention:", err)
-	}
-	if len(tweets) == 0 {
-		log.Fatal("mention is not found")
-	}
-	since := tweets[0].Identifier
-	fmt.Println(tweets, since)
-	since = ""
+	var since string
 
 	for {
-		time.Sleep(10 * time.Second)
-		tweets, err := getTweets(token, "https://api.twitter.com/1.1/statuses/mentions_timeline.json", option{"since_id": since})
+		time.Sleep(30 * time.Second)
+		opt := option{}
+		if since != "" {
+			opt["since_id"] = since
+		}
+		log.Println("polling... ", since)
+		tweets, err := getTweets(token, "https://api.twitter.com/1.1/statuses/mentions_timeline.json", opt)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 		if len(tweets) == 0 {
+			log.Println("no mentions")
 			continue
 		}
-		for _, tweet := range tweets {
-			status := fmt.Sprintf("@%s %s", tweet.User.ScreenName, handleText(dict, tweet.Text))
-			log.Println(status)
-			if false {
-				err = postTweet(token, "https://api.twitter.com/1.1/statuses/update.json", map[string]string{"status": status, "in_reply_to_status_id": tweet.Identifier})
+		if since != "" {
+			for _, tweet := range tweets {
+				status := fmt.Sprintf("@%s %s", tweet.User.ScreenName, handleText(dict, tweet.Text))
+				log.Println(status)
+				err = postTweet(token, "https://api.twitter.com/1.1/statuses/update.json", option{"status": status, "in_reply_to_status_id": tweet.Identifier})
 				if err != nil {
 					log.Println(err)
 				}
+				time.Sleep(5 * time.Second)
 			}
 		}
 		since = tweets[len(tweets)-1].Identifier
