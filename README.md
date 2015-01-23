@@ -2,8 +2,9 @@
 
 しりとりbot
 
-## Usage
+![](http://go-gyazo.appspot.com/02d1e406793400d7.png)
 
+## Usage
 
 ```
 @siritori_jp ギッハブ
